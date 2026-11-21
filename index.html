@@ -34,14 +34,23 @@
             }
         }
     </script>
+    <style>
+        @keyframes pulse-rec {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.6; }
+        }
+        .rec-dot {
+            animation: pulse-rec 1.1s infinite ease-in-out;
+        }
+    </style>
 </head>
 <body class="bg-newbery-paper text-slate-800 font-sans min-h-screen flex flex-col selection:bg-sky-200 selection:text-newbery-navy">
 
-    <!-- ==================== MODAL DE BIENVENIDA (PRIMER INGRESO) ==================== -->
-    <div id="welcomeModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/75 backdrop-blur-sm p-4 transition-opacity">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all p-6 sm:p-8 text-center">
+    <!-- ==================== MODAL DE BIENVENIDA (PRIMER INGRESO / LOGIN) ==================== -->
+    <div id="welcomeModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/75 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all p-6 sm:p-8 text-center my-auto">
             <!-- Mini Logo Globo Aerostático -->
-            <div class="mx-auto w-24 h-24 mb-4 flex items-center justify-center">
+            <div class="mx-auto w-20 h-20 mb-3 flex items-center justify-center">
                 <svg viewBox="0 0 220 280" class="w-full h-full drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <clipPath id="balloonClipSmall">
@@ -89,17 +98,17 @@
                 </svg>
             </div>
 
-            <h2 class="font-serif text-2xl sm:text-3xl font-extrabold text-newbery-navy mb-2">
+            <h2 class="font-serif text-2xl sm:text-3xl font-extrabold text-newbery-navy mb-1.5">
                 ¡Bienvenido al Diario!
             </h2>
-            <p class="text-slate-600 text-sm sm:text-base mb-6">
-                Ingresá tu nombre de usuario para leer y compartir noticias en el <strong class="text-newbery-navy">Diario Jorje Newbery</strong>.
+            <p class="text-slate-600 text-xs sm:text-sm mb-5">
+                Creá tu cuenta o iniciá sesión con tu usuario y contraseña para entrar al <strong class="text-newbery-navy">Diario Jorje Newbery</strong>.
             </p>
 
-            <form id="welcomeForm" class="space-y-4">
+            <form id="welcomeForm" class="space-y-3.5">
                 <div class="text-left">
-                    <label for="usernameInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">
-                        Tu nombre de usuario
+                    <label for="usernameInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1 ml-1">
+                        Nombre de usuario
                     </label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
@@ -111,14 +120,49 @@
                             required
                             maxlength="30"
                             placeholder="Ej: Sofía G. - 5° Grado"
-                            class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-2xl text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-newbery-blue focus:border-transparent transition"
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-2xl text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-newbery-blue focus:border-transparent transition text-sm sm:text-base"
                         >
                     </div>
                 </div>
 
+                <div class="text-left">
+                    <label for="passwordInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1 ml-1">
+                        Contraseña
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input
+                            type="password"
+                            id="passwordInput"
+                            required
+                            minlength="4"
+                            maxlength="40"
+                            placeholder="Mínimo 4 caracteres"
+                            class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-2xl text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-newbery-blue focus:border-transparent transition text-sm sm:text-base"
+                        >
+                        <button
+                            type="button"
+                            id="togglePassBtn"
+                            tabindex="-1"
+                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                            aria-label="Mostrar u ocultar contraseña"
+                        >
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1 ml-1">
+                        Si es tu primera vez, se registrará este usuario y contraseña automáticamente.
+                    </p>
+                </div>
+
+                <div id="authErrorBox" class="hidden bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold px-3 py-2 rounded-xl text-left"></div>
+
                 <button
                     type="submit"
-                    class="w-full py-3.5 px-6 bg-newbery-navy hover:bg-blue-900 active:scale-[0.99] text-white font-bold rounded-2xl shadow-lg shadow-blue-950/20 transition flex items-center justify-center gap-2 text-base"
+                    id="authSubmitBtn"
+                    class="w-full py-3 px-6 bg-newbery-navy hover:bg-blue-900 active:scale-[0.99] text-white font-bold rounded-2xl shadow-lg shadow-blue-950/20 transition flex items-center justify-center gap-2 text-base mt-2"
                 >
                     <span>Listo, entrar al Diario</span>
                     <i class="fa-solid fa-arrow-right"></i>
@@ -136,18 +180,18 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <span class="text-slate-200 truncate max-w-[160px] sm:max-w-xs">
+                <span class="text-slate-200 truncate max-w-[150px] sm:max-w-xs">
                     <i class="fa-solid fa-circle-user text-newbery-gold mr-1"></i>
                     <strong id="displayUsername">Invitado</strong>
                 </span>
                 <button
                     id="changeUserBtn"
                     type="button"
-                    title="Cambiar nombre de usuario"
+                    title="Cambiar cuenta o cerrar sesión"
                     class="bg-white/10 hover:bg-white/20 text-white px-2.5 py-1 rounded-xl text-xs font-medium transition flex items-center gap-1"
                 >
-                    <i class="fa-solid fa-pen text-[10px]"></i>
-                    <span>Cambiar</span>
+                    <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
+                    <span>Cambiar / Salir</span>
                 </button>
             </div>
         </div>
@@ -168,7 +212,7 @@
                 Diario Jorje Newbery
             </h1>
 
-            <!-- NUEVO LOGO: GLOBO AEROSTÁTICO DE LA ESCUELA JORGE NEWBERY -->
+            <!-- LOGO: GLOBO AEROSTÁTICO DE LA ESCUELA JORGE NEWBERY -->
             <div class="flex flex-col items-center justify-center">
                 <div class="relative group">
                     <svg viewBox="0 0 220 275" class="w-36 sm:w-44 h-auto mx-auto drop-shadow-sm" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo de la Escuela Jorge Newbery">
@@ -186,27 +230,21 @@
 
                         <!-- Cuerpo del globo aerostático -->
                         <g clip-path="url(#balloonClipMain)">
-                            <!-- Base rosa pastel -->
                             <rect x="20" y="10" width="180" height="185" fill="#f3a6c0"/>
-
-                            <!-- Franjas verticales superiores e inferiores -->
                             <path d="M25,14 Q55,100 25,186 L62,186 Q82,100 62,14 Z" fill="#b7dff0"/>
                             <path d="M62,14 Q82,100 62,186 L92,186 Q102,100 92,14 Z" fill="#ee7fa3"/>
                             <path d="M92,14 Q102,100 92,186 L128,186 Q118,100 128,14 Z" fill="#a26bc4"/>
                             <path d="M128,14 Q118,100 128,186 L158,186 Q138,100 158,14 Z" fill="#ee7fa3"/>
                             <path d="M158,14 Q138,100 158,186 L195,186 Q165,100 195,14 Z" fill="#b7dff0"/>
 
-                            <!-- Banda central con colores alternados -->
                             <path d="M20,52 Q110,72 200,52 L200,136 Q110,156 20,136 Z" fill="#f6b2ca"/>
                             <path d="M62,58 Q82,100 62,142 L92,145 Q102,100 92,62 Z" fill="#b7dff0"/>
                             <path d="M92,62 Q102,100 92,145 L128,145 Q118,100 128,62 Z" fill="#a26bc4"/>
                             <path d="M128,62 Q118,100 128,145 L158,142 Q138,100 158,58 Z" fill="#ee7fa3"/>
                             <path d="M158,58 Q138,100 158,142 L195,135 Q165,100 195,52 Z" fill="#b7dff0"/>
 
-                            <!-- Triángulo celeste inferior -->
                             <path d="M94,146 L110,186 L126,146 Z" fill="#b7dff0"/>
 
-                            <!-- Líneas negras curvas internas -->
                             <path d="M25,52 Q110,72 195,52" fill="none" stroke="#111111" stroke-width="3.5"/>
                             <path d="M25,136 Q110,156 195,136" fill="none" stroke="#111111" stroke-width="3.5"/>
                             <path d="M68,18 Q40,100 84,182" fill="none" stroke="#111111" stroke-width="3.5"/>
@@ -215,20 +253,12 @@
                             <path d="M152,18 Q180,100 136,182" fill="none" stroke="#111111" stroke-width="3.5"/>
                         </g>
 
-                        <!-- Contorno negro del globo -->
                         <ellipse cx="110" cy="100" rx="82" ry="86" fill="none" stroke="#111111" stroke-width="4.5"/>
 
-                        <!-- Sacos de lastre laterales -->
                         <path d="M84,226 C72,228 70,248 86,248" fill="#ee7fa3" stroke="#111111" stroke-width="4"/>
                         <path d="M136,226 C148,228 150,248 134,248" fill="#ee7fa3" stroke="#111111" stroke-width="4"/>
-
-                        <!-- Cuerpo de la canasta -->
                         <path d="M84,224 L89,256 Q110,263 131,256 L136,224 Z" fill="#ee7fa3" stroke="#111111" stroke-width="4" stroke-linejoin="round"/>
-
-                        <!-- Borde superior de la canasta -->
                         <path d="M80,213 Q110,218 140,213 Q143,225 135,227 Q110,231 85,227 Q77,225 80,213 Z" fill="#f38eb0" stroke="#111111" stroke-width="4" stroke-linejoin="round"/>
-
-                        <!-- Detalle frontal en forma de U -->
                         <path d="M104,228 C100,238 101,250 110,250 C119,250 120,238 116,228" fill="#ee7fa3" stroke="#111111" stroke-width="3.5" stroke-linecap="round"/>
                     </svg>
                 </div>
@@ -246,7 +276,7 @@
                 </span>
                 <div>
                     <h2 class="font-serif text-xl sm:text-2xl font-bold text-slate-900">Últimas Publicaciones</h2>
-                    <p class="text-xs text-slate-500">Noticias y novedades publicadas por los alumnos y docentes</p>
+                    <p class="text-xs text-slate-500">Noticias, fotos, videos y audios publicados por los alumnos y docentes</p>
                 </div>
             </div>
 
@@ -261,14 +291,14 @@
             <p class="text-slate-500 font-medium">Sincronizando ediciones con el servidor...</p>
         </div>
 
-        <!-- Estado Vacío (si no hay publicaciones aún) -->
+        <!-- Estado Vacío -->
         <div id="emptyState" class="hidden bg-white rounded-3xl border border-dashed border-slate-300 p-10 text-center shadow-sm">
             <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-sky-50 text-newbery-blue flex items-center justify-center text-2xl">
                 <i class="fa-solid fa-feather-pointed"></i>
             </div>
             <h3 class="font-serif text-xl font-bold text-slate-800 mb-1">Aún no hay publicaciones en el diario</h3>
             <p class="text-slate-500 text-sm max-w-md mx-auto mb-5">
-                ¡Sé el primero en escribir una noticia o título! Tocá el botón <strong class="text-newbery-navy">+</strong> en la esquina inferior derecha para publicar.
+                ¡Sé el primero en compartir una noticia, foto, video o audio! Tocá el botón <strong class="text-newbery-navy">+</strong> en la esquina inferior derecha.
             </p>
             <button
                 type="button"
@@ -297,9 +327,9 @@
         <i class="fa-solid fa-plus transition-transform duration-200 group-hover:rotate-90"></i>
     </button>
 
-    <!-- ==================== MODAL PARA CREAR PUBLICACIÓN ==================== -->
-    <div id="createPostModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4">
-        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-fadeIn">
+    <!-- ==================== MODAL PARA CREAR PUBLICACIÓN (CON FOTO, VIDEO Y VOZ) ==================== -->
+    <div id="createPostModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto">
             <!-- Cabecera del Modal -->
             <div class="bg-newbery-navy px-6 py-4 flex items-center justify-between text-white">
                 <div class="flex items-center gap-2.5">
@@ -317,7 +347,7 @@
             </div>
 
             <!-- Formulario -->
-            <form id="createPostForm" class="p-6 space-y-4">
+            <form id="createPostForm" class="p-5 sm:p-6 space-y-4">
                 <div>
                     <label for="postTitleInput" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
                         Nombre de la publicación <span class="text-red-500">*</span>
@@ -328,7 +358,7 @@
                         required
                         maxlength="100"
                         placeholder="Ej: Acto del Día de la Bandera o Torneo de Fútbol"
-                        class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-newbery-blue focus:border-transparent transition"
+                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-newbery-blue focus:border-transparent transition text-sm sm:text-base"
                     >
                 </div>
 
@@ -338,11 +368,85 @@
                     </label>
                     <textarea
                         id="postContentInput"
-                        rows="4"
+                        rows="3"
                         maxlength="800"
                         placeholder="Escribí acá el desarrollo de la noticia, horarios, o lo que quieras compartir con la escuela..."
-                        class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-2xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-newbery-blue focus:border-transparent transition resize-none"
+                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-2xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-newbery-blue focus:border-transparent transition resize-none"
                     ></textarea>
+                </div>
+
+                <!-- ==================== BOTONES MULTIMEDIA: FOTO, VIDEO Y VOZ ==================== -->
+                <div>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                        Adjuntar contenido multimedia <span class="text-slate-400 font-normal">(Opcional)</span>
+                    </span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <!-- Botón Foto -->
+                        <label class="cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-3 rounded-2xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-newbery-navy text-xs font-bold transition">
+                            <i class="fa-solid fa-camera text-newbery-blue text-sm"></i>
+                            <span>Foto</span>
+                            <input type="file" id="photoFileInput" accept="image/*" class="hidden">
+                        </label>
+
+                        <!-- Botón Video -->
+                        <label class="cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-900 text-xs font-bold transition">
+                            <i class="fa-solid fa-video text-indigo-600 text-sm"></i>
+                            <span>Video</span>
+                            <input type="file" id="videoFileInput" accept="video/*" class="hidden">
+                        </label>
+
+                        <!-- Botón Grabar Voz -->
+                        <button
+                            type="button"
+                            id="voiceRecordBtn"
+                            class="flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-3 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-900 text-xs font-bold transition"
+                        >
+                            <i id="voiceBtnIcon" class="fa-solid fa-microphone text-rose-600 text-sm"></i>
+                            <span id="voiceBtnLabel">Voz</span>
+                        </button>
+                    </div>
+
+                    <!-- Barra de estado de grabación en vivo -->
+                    <div id="recordingStatusBar" class="hidden mt-2.5 bg-rose-50 border border-rose-200 rounded-2xl px-4 py-2.5 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3 h-3 rounded-full bg-rose-600 rec-dot"></span>
+                            <span class="text-xs font-bold text-rose-800">Grabando nota de voz...</span>
+                            <span id="recordingTimer" class="text-xs font-mono font-bold text-rose-600">00:00</span>
+                        </div>
+                        <button
+                            type="button"
+                            id="stopRecordingBtn"
+                            class="px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition"
+                        >
+                            <i class="fa-solid fa-stop mr-1"></i>Detener
+                        </button>
+                    </div>
+
+                    <!-- ==================== VISTA PREVIA DEL ADJUNTO ==================== -->
+                    <div id="mediaPreviewContainer" class="hidden mt-3 relative bg-slate-50 border border-slate-200 rounded-2xl p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <span id="mediaPreviewLabel" class="text-xs font-bold text-newbery-navy flex items-center gap-1.5">
+                                <i class="fa-solid fa-paperclip"></i> Archivo adjunto
+                            </span>
+                            <button
+                                type="button"
+                                id="removeMediaBtn"
+                                class="text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-xl transition flex items-center gap-1"
+                            >
+                                <i class="fa-solid fa-trash-can"></i>
+                                <span>Quitar</span>
+                            </button>
+                        </div>
+
+                        <!-- Vista previa Imagen -->
+                        <img id="photoPreviewImg" src="" alt="Vista previa de foto" class="hidden w-full max-h-52 object-cover rounded-xl border border-slate-200">
+
+                        <!-- Vista previa Video -->
+                        <video id="videoPreviewPlayer" controls class="hidden w-full max-h-52 rounded-xl bg-black"></video>
+
+                        <!-- Vista previa Audio / Voz -->
+                        <audio id="audioPreviewPlayer" controls class="hidden w-full h-10 mt-1"></audio>
+                    </div>
                 </div>
 
                 <div class="bg-slate-100 px-4 py-2.5 rounded-2xl flex items-center justify-between text-xs text-slate-600">
@@ -350,7 +454,7 @@
                     <strong id="modalAuthorName" class="text-newbery-navy">Usuario</strong>
                 </div>
 
-                <div class="flex items-center justify-end gap-3 pt-2">
+                <div class="flex items-center justify-end gap-3 pt-1">
                     <button
                         type="button"
                         id="cancelPostBtn"
@@ -371,6 +475,14 @@
         </div>
     </div>
 
+    <!-- ==================== LIGHTBOX PARA AMPLIAR FOTOS ==================== -->
+    <div id="imageLightbox" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4" onclick="closeImageLightbox()">
+        <button type="button" onclick="closeImageLightbox()" class="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center text-lg">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img id="lightboxImage" src="" alt="Foto ampliada" class="max-w-full max-h-[88vh] rounded-2xl shadow-2xl object-contain" onclick="event.stopPropagation()">
+    </div>
+
     <!-- ==================== NOTIFICACIÓN TOAST ==================== -->
     <div id="toastNotification" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2.5 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-medium transition-all">
         <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
@@ -385,6 +497,7 @@
             ref,
             push,
             set,
+            get,
             onValue,
             runTransaction,
             serverTimestamp
@@ -401,18 +514,24 @@
         const postsRef = ref(db, "diario_jorge_newbery/publicaciones");
         const connectedRef = ref(db, ".info/connected");
 
-        // Clave para localStorage
+        // Claves para localStorage
         const STORAGE_USER_KEY = "diario_newbery_username";
+        const STORAGE_PASS_HASH_KEY = "diario_newbery_pass_hash";
         const STORAGE_LIKES_KEY = "diario_newbery_liked_posts";
 
-        // Elementos del DOM
+        // Elementos del DOM - Autenticación
         const welcomeModal = document.getElementById("welcomeModal");
         const welcomeForm = document.getElementById("welcomeForm");
         const usernameInput = document.getElementById("usernameInput");
+        const passwordInput = document.getElementById("passwordInput");
+        const togglePassBtn = document.getElementById("togglePassBtn");
+        const authErrorBox = document.getElementById("authErrorBox");
+        const authSubmitBtn = document.getElementById("authSubmitBtn");
         const displayUsername = document.getElementById("displayUsername");
         const modalAuthorName = document.getElementById("modalAuthorName");
         const changeUserBtn = document.getElementById("changeUserBtn");
 
+        // Elementos del DOM - Modal Crear Publicación
         const createPostModal = document.getElementById("createPostModal");
         const openModalFab = document.getElementById("openModalFab");
         const closeModalBtn = document.getElementById("closeModalBtn");
@@ -422,6 +541,21 @@
         const postContentInput = document.getElementById("postContentInput");
         const submitPostBtn = document.getElementById("submitPostBtn");
 
+        // Elementos del DOM - Multimedia
+        const photoFileInput = document.getElementById("photoFileInput");
+        const videoFileInput = document.getElementById("videoFileInput");
+        const voiceRecordBtn = document.getElementById("voiceRecordBtn");
+        const recordingStatusBar = document.getElementById("recordingStatusBar");
+        const recordingTimer = document.getElementById("recordingTimer");
+        const stopRecordingBtn = document.getElementById("stopRecordingBtn");
+        const mediaPreviewContainer = document.getElementById("mediaPreviewContainer");
+        const mediaPreviewLabel = document.getElementById("mediaPreviewLabel");
+        const removeMediaBtn = document.getElementById("removeMediaBtn");
+        const photoPreviewImg = document.getElementById("photoPreviewImg");
+        const videoPreviewPlayer = document.getElementById("videoPreviewPlayer");
+        const audioPreviewPlayer = document.getElementById("audioPreviewPlayer");
+
+        // Elementos del DOM - Feed
         const postsFeed = document.getElementById("postsFeed");
         const loadingState = document.getElementById("loadingState");
         const emptyState = document.getElementById("emptyState");
@@ -429,12 +563,20 @@
         const connectionDot = document.getElementById("connectionDot");
         const connectionText = document.getElementById("connectionText");
 
+        // Estado multimedia temporal del formulario
+        let attachedMedia = null; // { type: 'photo' | 'video' | 'audio', dataUrl: string, duration?: string }
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let recTimerInterval = null;
+        let recSeconds = 0;
+
         // Mostrar fecha actual formateada en el encabezado
         const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const todayStr = new Date().toLocaleDateString('es-AR', dateOptions);
         document.getElementById("currentDateDisplay").textContent = todayStr.charAt(0).toUpperCase() + todayStr.slice(1);
 
-        // Función para mostrar notificaciones Toast sin usar alert()
+        // Notificaciones Toast
         function showToast(message, isError = false) {
             const toast = document.getElementById("toastNotification");
             const toastIcon = document.getElementById("toastIcon");
@@ -451,19 +593,26 @@
             setTimeout(() => {
                 toast.classList.add("hidden");
                 toast.classList.remove("flex");
-            }, 3000);
+            }, 3400);
         }
 
-        // ==================== GESTIÓN DE USUARIO ====================
+        // ==================== 1. REGISTRO E INICIO DE SESIÓN CON USUARIO Y CONTRASEÑA ====================
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password + "_newbery_salt_2026");
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            return Array.from(new Uint8Array(hashBuffer))
+                .map(b => b.toString(16).padStart(2, "0"))
+                .join("");
+        }
+
+        // Normalizar clave para ruta segura en Firebase RTDB (sin ., #, $, [, ])
+        function sanitizeUserKey(username) {
+            return username.trim().toLowerCase().replace(/[.#$\[\]\/]/g, "_");
+        }
+
         function getCurrentUser() {
             return localStorage.getItem(STORAGE_USER_KEY) || "";
-        }
-
-        function setCurrentUser(name) {
-            const cleanName = name.trim();
-            if (!cleanName) return;
-            localStorage.setItem(STORAGE_USER_KEY, cleanName);
-            updateUserUI(cleanName);
         }
 
         function updateUserUI(name) {
@@ -473,7 +622,9 @@
 
         function checkInitialUser() {
             const savedUser = getCurrentUser();
-            if (!savedUser) {
+            const savedHash = localStorage.getItem(STORAGE_PASS_HASH_KEY);
+            if (!savedUser || !savedHash) {
+                authErrorBox.classList.add("hidden");
                 welcomeModal.classList.remove("hidden");
                 welcomeModal.classList.add("flex");
                 setTimeout(() => usernameInput.focus(), 100);
@@ -482,29 +633,302 @@
             }
         }
 
-        welcomeForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const enteredName = usernameInput.value.trim();
-            if (enteredName.length < 2) {
-                showToast("Por favor ingresá un nombre válido", true);
-                return;
+        togglePassBtn.addEventListener("click", () => {
+            const icon = togglePassBtn.querySelector("i");
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
             }
-            setCurrentUser(enteredName);
-            welcomeModal.classList.add("hidden");
-            welcomeModal.classList.remove("flex");
-            showToast(`¡Bienvenido/a, ${enteredName}!`);
         });
 
+        welcomeForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const enteredName = usernameInput.value.trim();
+            const enteredPass = passwordInput.value;
+
+            authErrorBox.classList.add("hidden");
+
+            if (enteredName.length < 2) {
+                authErrorBox.textContent = "Por favor ingresá un nombre de usuario válido (mínimo 2 letras).";
+                authErrorBox.classList.remove("hidden");
+                return;
+            }
+            if (enteredPass.length < 4) {
+                authErrorBox.textContent = "La contraseña debe tener al menos 4 caracteres.";
+                authErrorBox.classList.remove("hidden");
+                return;
+            }
+
+            authSubmitBtn.disabled = true;
+            authSubmitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Verificando...</span>`;
+
+            try {
+                const passHash = await hashPassword(enteredPass);
+                const userKey = sanitizeUserKey(enteredName);
+                const userRef = ref(db, `diario_jorge_newbery/usuarios/${userKey}`);
+                const snapshot = await get(userRef);
+
+                if (snapshot.exists()) {
+                    // Usuario ya registrado en Firebase: verificar contraseña
+                    const userData = snapshot.val();
+                    if (userData.passwordHash !== passHash) {
+                        authErrorBox.textContent = "Contraseña incorrecta para este usuario. Si sos otra persona, elegí otro nombre.";
+                        authErrorBox.classList.remove("hidden");
+                        return;
+                    }
+                    // Contraseña correcta -> iniciar sesión con su nombre guardado
+                    const canonicalName = userData.username || enteredName;
+                    localStorage.setItem(STORAGE_USER_KEY, canonicalName);
+                    localStorage.setItem(STORAGE_PASS_HASH_KEY, passHash);
+                    updateUserUI(canonicalName);
+                    welcomeModal.classList.add("hidden");
+                    welcomeModal.classList.remove("flex");
+                    passwordInput.value = "";
+                    showToast(`¡Bienvenido/a nuevamente, ${canonicalName}!`);
+                } else {
+                    // Usuario nuevo: registrar en Firebase y guardar en localStorage
+                    await set(userRef, {
+                        username: enteredName,
+                        passwordHash: passHash,
+                        creadoEn: serverTimestamp()
+                    });
+                    localStorage.setItem(STORAGE_USER_KEY, enteredName);
+                    localStorage.setItem(STORAGE_PASS_HASH_KEY, passHash);
+                    updateUserUI(enteredName);
+                    welcomeModal.classList.add("hidden");
+                    welcomeModal.classList.remove("flex");
+                    passwordInput.value = "";
+                    showToast(`¡Cuenta creada! Bienvenido/a, ${enteredName}`);
+                }
+            } catch (error) {
+                console.error("Error de autenticación:", error);
+                // Respaldo local si hay algún bloqueo de red temporal
+                const passHash = await hashPassword(enteredPass);
+                localStorage.setItem(STORAGE_USER_KEY, enteredName);
+                localStorage.setItem(STORAGE_PASS_HASH_KEY, passHash);
+                updateUserUI(enteredName);
+                welcomeModal.classList.add("hidden");
+                welcomeModal.classList.remove("flex");
+                showToast(`¡Bienvenido/a, ${enteredName}!`);
+            } finally {
+                authSubmitBtn.disabled = false;
+                authSubmitBtn.innerHTML = `<span>Listo, entrar al Diario</span><i class="fa-solid fa-arrow-right"></i>`;
+            }
+        });
+
+        // Botón "Cambiar / Salir" en la barra superior
         changeUserBtn.addEventListener("click", () => {
-            usernameInput.value = getCurrentUser();
+            localStorage.removeItem(STORAGE_USER_KEY);
+            localStorage.removeItem(STORAGE_PASS_HASH_KEY);
+            usernameInput.value = "";
+            passwordInput.value = "";
+            authErrorBox.classList.add("hidden");
+            displayUsername.textContent = "Invitado";
             welcomeModal.classList.remove("hidden");
             welcomeModal.classList.add("flex");
             setTimeout(() => usernameInput.focus(), 100);
         });
 
-        // ==================== MODAL DE CREACIÓN ====================
+        // ==================== 2. GESTIÓN DE MULTIMEDIA (FOTO, VIDEO Y VOZ) ====================
+        function clearAttachedMedia() {
+            if (isRecording) stopVoiceRecording();
+            attachedMedia = null;
+            photoFileInput.value = "";
+            videoFileInput.value = "";
+
+            mediaPreviewContainer.classList.add("hidden");
+            photoPreviewImg.classList.add("hidden");
+            photoPreviewImg.src = "";
+            videoPreviewPlayer.classList.add("hidden");
+            videoPreviewPlayer.src = "";
+            audioPreviewPlayer.classList.add("hidden");
+            audioPreviewPlayer.src = "";
+        }
+
+        removeMediaBtn.addEventListener("click", clearAttachedMedia);
+
+        // Compresión automática de imagen en Canvas para Firebase RTDB
+        function compressImageToDataURL(file, maxWidth = 1024, quality = 0.78) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                        const canvas = document.createElement("canvas");
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL("image/jpeg", quality));
+                    };
+                    img.onerror = reject;
+                    img.src = event.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Subir Foto
+        photoFileInput.addEventListener("change", async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith("image/")) {
+                showToast("Seleccioná un archivo de imagen válido", true);
+                return;
+            }
+
+            try {
+                clearAttachedMedia();
+                const compressedDataUrl = await compressImageToDataURL(file);
+                attachedMedia = {
+                    type: "photo",
+                    dataUrl: compressedDataUrl
+                };
+                mediaPreviewLabel.innerHTML = `<i class="fa-solid fa-camera text-newbery-blue"></i> Foto lista para publicar`;
+                photoPreviewImg.src = compressedDataUrl;
+                photoPreviewImg.classList.remove("hidden");
+                mediaPreviewContainer.classList.remove("hidden");
+            } catch (err) {
+                console.error("Error procesando foto:", err);
+                showToast("No se pudo cargar la foto", true);
+            }
+        });
+
+        // Subir Video
+        videoFileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith("video/")) {
+                showToast("Seleccioná un archivo de video válido", true);
+                return;
+            }
+
+            // Validación de tamaño razonable para Firebase Realtime Database (máx. 6 MB)
+            const maxBytes = 6 * 1024 * 1024;
+            if (file.size > maxBytes) {
+                showToast("El video es muy pesado (máximo 6 MB). Elegí uno más corto.", true);
+                videoFileInput.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                clearAttachedMedia();
+                const dataUrl = event.target.result;
+                attachedMedia = {
+                    type: "video",
+                    dataUrl: dataUrl
+                };
+                mediaPreviewLabel.innerHTML = `<i class="fa-solid fa-video text-indigo-600"></i> Video listo para publicar`;
+                videoPreviewPlayer.src = dataUrl;
+                videoPreviewPlayer.classList.remove("hidden");
+                mediaPreviewContainer.classList.remove("hidden");
+            };
+            reader.onerror = () => showToast("Error al leer el video", true);
+            reader.readAsDataURL(file);
+        });
+
+        // Grabación de Voz en Vivo (MediaRecorder)
+        function formatDuration(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+            const s = (seconds % 60).toString().padStart(2, "0");
+            return `${m}:${s}`;
+        }
+
+        async function startVoiceRecording() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    showToast("Tu navegador no permite grabar audio desde el micrófono", true);
+                    return;
+                }
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                clearAttachedMedia();
+
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                recSeconds = 0;
+                recordingTimer.textContent = "00:00";
+
+                mediaRecorder.ondataavailable = (ev) => {
+                    if (ev.data.size > 0) audioChunks.push(ev.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const mimeType = mediaRecorder.mimeType || "audio/webm";
+                    const audioBlob = new Blob(audioChunks, { type: mimeType });
+                    const durationText = formatDuration(recSeconds);
+
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        attachedMedia = {
+                            type: "audio",
+                            dataUrl: reader.result,
+                            duration: durationText
+                        };
+                        mediaPreviewLabel.innerHTML = `<i class="fa-solid fa-microphone text-rose-600"></i> Nota de voz (${durationText})`;
+                        audioPreviewPlayer.src = reader.result;
+                        audioPreviewPlayer.classList.remove("hidden");
+                        mediaPreviewContainer.classList.remove("hidden");
+                    };
+                    reader.readAsDataURL(audioBlob);
+
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                recordingStatusBar.classList.remove("hidden");
+
+                recTimerInterval = setInterval(() => {
+                    recSeconds++;
+                    recordingTimer.textContent = formatDuration(recSeconds);
+                    // Límite automático de 90 segundos para mantener tamaño óptimo en Firebase
+                    if (recSeconds >= 90) {
+                        stopVoiceRecording();
+                        showToast("Duración máxima alcanzada (01:30)");
+                    }
+                }, 1000);
+            } catch (err) {
+                console.error("Error de micrófono:", err);
+                showToast("No se pudo acceder al micrófono. Verificá los permisos.", true);
+            }
+        }
+
+        function stopVoiceRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                clearInterval(recTimerInterval);
+                recordingStatusBar.classList.add("hidden");
+            }
+        }
+
+        voiceRecordBtn.addEventListener("click", () => {
+            if (!isRecording) {
+                startVoiceRecording();
+            } else {
+                stopVoiceRecording();
+            }
+        });
+
+        stopRecordingBtn.addEventListener("click", stopVoiceRecording);
+
+        // ==================== 3. MODAL DE CREACIÓN Y PUBLICACIÓN EN FIREBASE ====================
         window.openCreateModal = function() {
-            if (!getCurrentUser()) {
+            if (!getCurrentUser() || !localStorage.getItem(STORAGE_PASS_HASH_KEY)) {
                 checkInitialUser();
                 return;
             }
@@ -514,6 +938,7 @@
         };
 
         function closeCreateModal() {
+            clearAttachedMedia();
             createPostModal.classList.add("hidden");
             createPostModal.classList.remove("flex");
             createPostForm.reset();
@@ -523,14 +948,14 @@
         closeModalBtn.addEventListener("click", closeCreateModal);
         cancelPostBtn.addEventListener("click", closeCreateModal);
 
-        // Cerrar modal al hacer clic fuera de la tarjeta
         createPostModal.addEventListener("click", (e) => {
             if (e.target === createPostModal) closeCreateModal();
         });
 
-        // Enviar nueva publicación a Firebase
         createPostForm.addEventListener("submit", async (e) => {
             e.preventDefault();
+            if (isRecording) stopVoiceRecording();
+
             const title = postTitleInput.value.trim();
             const content = postContentInput.value.trim();
             const author = getCurrentUser() || "Anónimo";
@@ -544,8 +969,7 @@
             submitPostBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Publicando...</span>`;
 
             try {
-                const newPostRef = push(postsRef);
-                await set(newPostRef, {
+                const postPayload = {
                     titulo: title,
                     contenido: content,
                     autor: author,
@@ -558,20 +982,31 @@
                         minute: "2-digit"
                     }),
                     likes: 0
-                });
+                };
+
+                if (attachedMedia) {
+                    postPayload.mediaTipo = attachedMedia.type;
+                    postPayload.mediaUrl = attachedMedia.dataUrl;
+                    if (attachedMedia.duration) {
+                        postPayload.mediaDuracion = attachedMedia.duration;
+                    }
+                }
+
+                const newPostRef = push(postsRef);
+                await set(newPostRef, postPayload);
 
                 closeCreateModal();
                 showToast("¡Publicación agregada al diario!");
             } catch (error) {
                 console.error("Error al publicar en Firebase:", error);
-                showToast("Error al conectar con Firebase. Intentá de nuevo.", true);
+                showToast("Error al subir la publicación. Si adjuntaste un archivo grande, probá con uno más liviano.", true);
             } finally {
                 submitPostBtn.disabled = false;
                 submitPostBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i><span>Publicar</span>`;
             }
         });
 
-        // ==================== SISTEMA DE "ME GUSTA" EN TIEMPO REAL ====================
+        // ==================== 4. SISTEMA DE "ME GUSTA" EN TIEMPO REAL ====================
         function getLikedPosts() {
             try {
                 return JSON.parse(localStorage.getItem(STORAGE_LIKES_KEY) || "[]");
@@ -610,14 +1045,28 @@
             }
         };
 
-        // Escapar HTML para evitar inyección de código (XSS)
+        // Lightbox para ampliar fotos del muro
+        window.openImageLightbox = function(src) {
+            const lightbox = document.getElementById("imageLightbox");
+            document.getElementById("lightboxImage").src = src;
+            lightbox.classList.remove("hidden");
+            lightbox.classList.add("flex");
+        };
+
+        window.closeImageLightbox = function() {
+            const lightbox = document.getElementById("imageLightbox");
+            lightbox.classList.add("hidden");
+            lightbox.classList.remove("flex");
+            document.getElementById("lightboxImage").src = "";
+        };
+
         function escapeHTML(str) {
             const div = document.createElement("div");
             div.textContent = str;
             return div.innerHTML;
         }
 
-        // ==================== RENDERIZADO EN TIEMPO REAL ====================
+        // ==================== 5. RENDERIZADO EN TIEMPO REAL ====================
         onValue(connectedRef, (snap) => {
             if (snap.val() === true) {
                 connectionDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
@@ -641,7 +1090,6 @@
 
             emptyState.classList.add("hidden");
 
-            // Convertir objeto de Firebase en array y ordenar de más reciente a más antigua
             const postsArray = Object.entries(data).map(([id, post]) => ({
                 id,
                 ...post
@@ -671,8 +1119,36 @@
                     })
                     : (post.fechaLocal || "Reciente");
 
-                // Destacar la primera publicación más reciente en pantallas medianas/grandes
                 const isFeatured = index === 0;
+
+                // Renderizado de contenido multimedia adjunto (foto, video o nota de voz)
+                let mediaHTML = "";
+                if (post.mediaUrl && post.mediaTipo === "photo") {
+                    mediaHTML = `
+                        <div class="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 cursor-zoom-in" onclick="openImageLightbox('${post.mediaUrl}')">
+                            <img src="${post.mediaUrl}" alt="${safeTitle}" loading="lazy" class="w-full ${isFeatured ? 'max-h-[420px]' : 'max-h-64'} object-cover hover:scale-[1.02] transition-transform duration-300">
+                        </div>
+                    `;
+                } else if (post.mediaUrl && post.mediaTipo === "video") {
+                    mediaHTML = `
+                        <div class="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-black">
+                            <video src="${post.mediaUrl}" controls preload="metadata" class="w-full ${isFeatured ? 'max-h-[420px]' : 'max-h-64'} mx-auto"></video>
+                        </div>
+                    `;
+                } else if (post.mediaUrl && post.mediaTipo === "audio") {
+                    const durBadge = post.mediaDuracion ? ` (${escapeHTML(post.mediaDuracion)})` : "";
+                    mediaHTML = `
+                        <div class="mb-4 bg-sky-50/80 border border-sky-200/80 rounded-2xl p-3 flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-newbery-navy text-newbery-gold flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-microphone-lines text-sm"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-newbery-navy mb-1">Nota de voz${durBadge}</p>
+                                <audio src="${post.mediaUrl}" controls preload="metadata" class="w-full h-8"></audio>
+                            </div>
+                        </div>
+                    `;
+                }
 
                 return `
                     <article class="bg-white rounded-3xl border ${isFeatured ? 'border-newbery-navy/30 md:col-span-2 shadow-md' : 'border-slate-200 shadow-sm'} p-5 sm:p-6 flex flex-col justify-between hover:shadow-md transition-shadow">
@@ -695,7 +1171,9 @@
                                 <p class="text-slate-600 text-sm sm:text-base leading-relaxed whitespace-pre-line mb-4">
                                     ${safeContent}
                                 </p>
-                            ` : '<div class="mb-3"></div>'}
+                            ` : '<div class="mb-2"></div>'}
+
+                            ${mediaHTML}
                         </div>
 
                         <div class="pt-3.5 mt-2 border-t border-slate-100 flex items-center justify-between gap-2">
